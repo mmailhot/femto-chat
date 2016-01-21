@@ -1,8 +1,9 @@
 {
-	"name": "femto-chat",
-	"description": "A minimal D application.",
-	"copyright": "Copyright © 2016, mmailhot",
-	"authors": ["mmailhot"],
-	"dependencies": {
-	}
+	  "name": "femto-chat",
+	  "description": "A minimal IRC Client.",
+	  "copyright": "Copyright © 2016, mmailhot",
+	  "authors": ["mmailhot"],
+	  "dependencies": {
+        "vibe-d": "0.7.26"
+	  }
 }
