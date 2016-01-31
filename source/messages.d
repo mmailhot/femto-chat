@@ -39,7 +39,6 @@ string ircSerialize(T)(T msg){
 }
 
 void ircDeserializeAndSend(string s, Task recipient){
-  writeln(s);
   string[] words = s.split();
 
   foreach(m; __traits(allMembers, femtochat.messages)){
@@ -48,30 +47,39 @@ void ircDeserializeAndSend(string s, Task recipient){
       
       static if(is(TU == struct) && __traits(hasMember, TU, "TAG")){
         alias FIELD_TYPES = FieldNameTuple!TU;
-        
+
+        int tagIndex;
         int i = 0;
-        if(TU.TAG == words[1]){
+        if(words[0][0] == ':'){
+          tagIndex = 1;
+        }else{
+          tagIndex = 0;
+          i = 1;
+        }
+        if(TU.TAG == words[tagIndex]){
           TU msg;
           foreach(f; FIELD_TYPES){
             enum longStringIndex = staticIndexOf!(LongString, __traits(getAttributes, __traits(getMember, msg, f)));
             
             static if(longStringIndex != -1){
-              __traits(getMember, msg, f) = join(words[i..$], " ")[1..$];
+              __traits(getMember, msg, f) = s[(join(words[0..i], " ").length + 2)..$];
             }else{
               __traits(getMember, msg, f) = to!(typeof(ID!(__traits(getMember, msg, f))))(words[i]);
             }
             
             i++;
-            if(i == 1){
+            if(i == tagIndex){
               i++;
             }
           }
-          writeln(msg);
+
           send(recipient, msg);
+          return;
         }
       }
     }
   }
+  writeln(format("Unparsed Message: %s", s));
 }
 
 unittest{
@@ -123,4 +131,34 @@ struct IrcNotice{
 
   string type;
   @LongString string msg;
+}
+
+struct IrcMotd{
+  @NoSerialize string sender;
+
+  enum TAG = "372";
+
+  string username;
+  @LongString string msg;
+}
+struct IrcPing{
+  enum TAG = "PING";
+
+  @LongString string identifier;
+}
+
+struct IrcPong{
+  enum TAG = "PONG";
+
+  @LongString string identifier;
+}
+
+struct IrcMode{
+  @NoSerialize string sender;
+
+  enum TAG = "MODE";
+
+  string nick;
+
+  @LongString string mode;
 }

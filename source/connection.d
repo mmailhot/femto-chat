@@ -21,6 +21,8 @@ class Connection{
   string channel_name;
   string nick;
 
+  bool inChannel = false;
+
   this(TCPConnection tcpConnection, string channel, string nick){
     this.tcpConnection = tcpConnection;
     this.channel_name = channel;
@@ -31,10 +33,19 @@ class Connection{
     this.tcpConnection.write(ircSerialize(msg));
   }
 
-  void connectToChannel(){
+  void connectToServer(){
     send(IrcNick(this.nick));
     send(IrcUser(this.nick));
-    send(IrcJoin(this.channel_name));
+  }
+
+  void joinChannel(){
+    if(this.inChannel) return;
+    send(IrcJoin(format("#%s", this.channel_name)));
+    this.inChannel = true;
+  }
+
+  void respondToPing(string identifier){
+    send(IrcPong(identifier));
   }
 }
 
@@ -56,12 +67,16 @@ void spawnConnection(Task ownerTid, string url, ushort port, string channel, str
   runTask(toDelegate(&spawnTCPReader), thisTid, connection);
   sleep(500.msecs);
   Connection conn = new Connection(connection, channel, nick);
-  conn.connectToChannel();
+  conn.connectToServer();
 
   while(!killFlag){
     yield();
     receiveTimeout(dur!"msecs"(50),
-                   (Variant v){writeln("FOO");}
+                   (IrcPing m){conn.respondToPing(m.identifier);},
+                   (IrcNotice m){writeln(m.msg);},
+                   (IrcMotd m){writeln(m.msg);},
+                   (IrcMode m){conn.joinChannel();},
+                   (Variant v){writeln(v);}
                    );
   }
 }
