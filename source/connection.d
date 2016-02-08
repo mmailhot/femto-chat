@@ -63,7 +63,8 @@ class Connection{
   }
 
   void sendMessage(string text){
-    send(IrcPrivMsg("#" ~ this.channel_name, text));
+    term.newMessage(DisplayableMessage(this.nick, 1, text));
+    send(IrcPrivMsg("", "#" ~ this.channel_name, text));
   }
 
   void receivePlaintext(string text){
