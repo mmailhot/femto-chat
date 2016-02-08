@@ -4,7 +4,8 @@
 	  "copyright": "Copyright © 2016, mmailhot",
 	  "authors": ["mmailhot"],
 	  "dependencies": {
-        "vibe-d": "0.7.26"
+        "vibe-d": "0.7.26",
+        "ncurses": "~master"
 	  },
     "versions": ["VibeDefaultMain", "VibeDisableCommandLineParsing"]
 }

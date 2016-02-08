@@ -1,6 +1,6 @@
 with import <nixpkgs> {}; {
   dEnv = stdenv.mkDerivation {
     name = "d";
-    buildInputs = [dmd dub libevent openssl];
+    buildInputs = [dmd dub libevent openssl ncurses];
   };
 }

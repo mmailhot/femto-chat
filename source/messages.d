@@ -79,7 +79,7 @@ void ircDeserializeAndSend(string s, Task recipient){
       }
     }
   }
-  writeln(format("Unparsed Message: %s", s));
+  send(recipient, s);
 }
 
 unittest{
@@ -161,4 +161,23 @@ struct IrcMode{
   string nick;
 
   @LongString string mode;
+}
+
+struct IrcPrivMsg{
+  @NoSerialize string sender;
+
+  enum TAG = "PRIVMSG";
+
+  string target;
+  @LongString string msg;
+}
+
+struct IrcChanMsg{
+  @NoSerialize string sender;
+
+  enum TAG = "332";
+
+  string nick;
+  string chan;
+  @LongString string msg;
 }
